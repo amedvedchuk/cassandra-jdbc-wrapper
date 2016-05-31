@@ -59,6 +59,8 @@ public class CassandraConnection extends AbstractConnection implements Connectio
     public static final String DB_PRODUCT_NAME = "Cassandra";
     public static final String DEFAULT_CQL_VERSION = "3.0.0";
     public ConcurrentMap<String, CassandraPreparedStatement> preparedStatements = Maps.newConcurrentMap();
+    public ConcurrentMap<String, CassandraCollableStatement> calldStatements = Maps.newConcurrentMap();
+
 
     public static Compression defaultCompression = Compression.LZ4;
 
@@ -355,6 +357,35 @@ public class CassandraConnection extends AbstractConnection implements Connectio
         return prepStmt;
     }
 
+    @Override
+    public CassandraCollableStatement prepareCall(String cql) throws SQLException {
+    	
+    	CassandraCollableStatement prepStmt = calldStatements.get(cql);    	
+    	if(prepStmt==null){
+    		// Statement didn't exist
+    		prepStmt = calldStatements.putIfAbsent(cql, prepareCallStatement(cql,DEFAULT_TYPE,DEFAULT_CONCURRENCY,DEFAULT_HOLDABILITY));
+    		if(prepStmt==null){
+    			// Statement has already been created by another thread, so we'll just get it
+    			return calldStatements.get(cql);
+    		}
+    	}
+    	
+        return prepStmt;
+    }
+    
+	  
+	  public CallableStatement prepareCall(String cql, int arg1, int arg2) throws SQLException
+	  {
+		  return prepareCall(cql);
+	  }
+	
+	  public CallableStatement prepareCall(String cql, int arg1, int arg2, int arg3) throws SQLException
+	  {
+	     return prepareCall(cql);
+	  }
+
+    
+    
     public CassandraPreparedStatement prepareStatement(String cql, int rsType) throws SQLException
     {
         return prepareStatement(cql,rsType,DEFAULT_CONCURRENCY,DEFAULT_HOLDABILITY);
@@ -373,6 +404,14 @@ public class CassandraConnection extends AbstractConnection implements Connectio
         return statement;
     }
 
+    public CassandraCollableStatement prepareCallStatement(String cql, int rsType, int rsConcurrency, int rsHoldability) throws SQLException
+    {
+        checkNotClosed();
+        CassandraCollableStatement statement = new CassandraCollableStatement(this, cql, rsType,rsConcurrency,rsHoldability);
+        statements.add(statement);
+        return statement;
+    }
+    
     public void rollback() throws SQLException
     {
         checkNotClosed();

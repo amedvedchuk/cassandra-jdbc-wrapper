@@ -5,11 +5,11 @@
 
 	<groupId>com.github.adejanovski</groupId>
 	<artifactId>cassandra-jdbc-wrapper</artifactId>
-	<version>3.0.2</version>
+	<version>3.0.2-patched</version>
 
 	<packaging>jar</packaging>
 	<name>Cassandra JDBC Wrapper</name>
-	<description>JDBC wrapper for the DataStax CQL Java Driver.</description>
+	<description>JDBC wrapper for the DataStax CQL Java Driver. Patched by A.Medvedchuk to support callable statements.</description>
 	<url>https://github.com/adejanovski/cassandra-jdbc-wrapper</url>
 
 	<inceptionYear>2015</inceptionYear>
